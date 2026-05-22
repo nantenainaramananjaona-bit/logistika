@@ -1,0 +1,70 @@
+{
+  "version": "1.0",
+  "last_updated": "2025-01-01T00:00:00.000Z",
+  "dim_models": [
+    {
+      "name": "WOOLWORTHS",
+      "L": 60,
+      "l": 40,
+      "h": 30
+    },
+    {
+      "name": "HUGO BOSS",
+      "L": 65,
+      "l": 45,
+      "h": 35
+    },
+    {
+      "name": "STANDARD",
+      "L": 61,
+      "l": 41,
+      "h": 30
+    },
+    {
+      "name": "M&S",
+      "L": 58,
+      "l": 38,
+      "h": 28
+    }
+  ],
+  "weight_piece_models": [
+    {
+      "name": "POLO SHIRT",
+      "wPiece": 0.25
+    },
+    {
+      "name": "T-SHIRT",
+      "wPiece": 0.18
+    },
+    {
+      "name": "JACKET",
+      "wPiece": 0.65
+    },
+    {
+      "name": "TROUSERS",
+      "wPiece": 0.42
+    },
+    {
+      "name": "SWEATER",
+      "wPiece": 0.38
+    }
+  ],
+  "weight_carton_models": [
+    {
+      "name": "SMALL BOX",
+      "wCarton": 0.6
+    },
+    {
+      "name": "MEDIUM BOX",
+      "wCarton": 0.8
+    },
+    {
+      "name": "LARGE BOX",
+      "wCarton": 1.2
+    },
+    {
+      "name": "HEAVY BOX",
+      "wCarton": 1.8
+    }
+  ]
+}

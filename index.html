@@ -1,0 +1,613 @@
+cat > /tmp/part1.html << 'ENDPART1'
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Packing List Pro v9</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+[data-theme="dark"]{--bg:#0f1117;--surface:#1a1d27;--surface2:#222636;--border:#2e3347;--border2:#3d4260;--text:#e8eaf0;--text2:#8a8fa8;--text3:#5a5f7a;--inp-bg:#222636;--total-bg:rgba(246,224,94,0.1);--total-border:rgba(246,224,94,0.4);--total-text:#f6e05e;--row-hover:rgba(79,142,247,0.05);--mixed-bg:rgba(155,114,245,0.07);}
+[data-theme="light"]{--bg:#f0f2f8;--surface:#fff;--surface2:#f4f6fb;--border:#d8dce8;--border2:#b8bfd0;--text:#1a1d2e;--text2:#5a607a;--text3:#9098b4;--inp-bg:#f4f6fb;--total-bg:rgba(200,160,0,0.1);--total-border:rgba(180,140,0,0.4);--total-text:#8a6000;--row-hover:rgba(79,142,247,0.04);--mixed-bg:rgba(155,114,245,0.06);}
+:root{--accent:#4f8ef7;--accent2:#38d9a9;--warn:#f5a623;--danger:#e05c5c;--purple:#9b72f5;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;padding:20px 16px 60px;transition:background .3s,color .3s;}
+/* WELCOME */
+#welcome-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.welcome-box{background:var(--surface);border:2px solid var(--accent);border-radius:18px;padding:40px 48px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 80px rgba(79,142,247,0.3);}
+.welcome-logo{font-size:52px;margin-bottom:12px;}
+.welcome-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:6px;font-family:var(--mono);}
+.welcome-sub{font-size:12px;color:var(--text2);margin-bottom:28px;font-family:var(--mono);letter-spacing:1px;}
+.welcome-input{width:100%;background:var(--inp-bg);border:2px solid var(--border2);border-radius:8px;padding:12px 16px;color:var(--text);font-family:var(--mono);font-size:16px;font-weight:700;text-align:center;letter-spacing:3px;margin-bottom:16px;outline:none;transition:border-color .2s;}
+.welcome-input:focus{border-color:var(--accent);}
+.welcome-input.error{border-color:var(--danger);animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.welcome-btn{width:100%;padding:13px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--purple));color:white;font-family:var(--sans);font-size:15px;font-weight:700;cursor:pointer;transition:filter .2s;margin-bottom:10px;}
+.welcome-btn:hover{filter:brightness(1.1);}
+.welcome-error{color:var(--danger);font-size:12px;font-family:var(--mono);min-height:16px;margin-bottom:8px;}
+/* BOX MODAL */
+#box-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:8888;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+#box-modal-overlay.open{display:flex;}
+.box-modal{background:var(--surface);border:2px solid var(--purple);border-radius:14px;padding:28px 32px;max-width:420px;width:92%;box-shadow:0 12px 60px rgba(155,114,245,0.3);}
+.box-modal-title{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--purple);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.bm-section-lbl{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;}
+.bm-section-lbl.wgt::before{content:'';display:inline-block;width:3px;height:10px;border-radius:2px;background:var(--warn);}
+.bm-section-lbl.dim::before{content:'';display:inline-block;width:3px;height:10px;border-radius:2px;background:var(--purple);}
+.bm-weight-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.bm-dim-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px;}
+.bm-field{display:flex;flex-direction:column;gap:4px;}
+.bm-label{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+.bm-input{background:var(--inp-bg);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:13px;font-weight:600;outline:none;transition:border-color .2s;width:100%;}
+.bm-input:focus{border-color:var(--purple);}
+.bm-input.wi:focus{border-color:var(--warn);}
+.box-modal-actions{display:flex;gap:8px;}
+.btn-modal-save{flex:1;padding:10px;border:none;border-radius:7px;background:linear-gradient(135deg,var(--purple),var(--accent));color:white;font-weight:700;cursor:pointer;font-size:13px;}
+.btn-modal-cancel{padding:10px 18px;border:1px solid var(--border2);border-radius:7px;background:transparent;color:var(--text2);font-weight:700;cursor:pointer;font-size:13px;}
+/* MAJ BSD MODAL */
+#maj-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:9500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(5px);}
+#maj-modal-overlay.open{display:flex;}
+.maj-modal{background:var(--surface);border:2px solid var(--accent2);border-radius:16px;padding:28px 32px;max-width:520px;width:94%;box-shadow:0 16px 70px rgba(56,217,169,0.3);max-height:92vh;overflow-y:auto;}
+.maj-title{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--accent2);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.maj-type-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.maj-type-btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:var(--mono);transition:all .2s;}
+.maj-type-btn.active{border-color:var(--accent2);color:var(--accent2);background:color-mix(in srgb,var(--accent2) 12%,var(--surface2));}
+.maj-list-area{margin-bottom:16px;}
+.maj-list-title{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;}
+.maj-items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:12px;}
+.maj-item-card{background:var(--surface2);border:2px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .2s;font-family:var(--mono);font-size:12px;}
+.maj-item-card:hover{border-color:var(--border2);}
+.maj-item-card.selected{border-color:var(--accent2);background:color-mix(in srgb,var(--accent2) 10%,var(--surface2));}
+.maj-item-card.new-entry{border-style:dashed;border-color:color-mix(in srgb,var(--accent2) 50%,transparent);color:var(--accent2);}
+.maj-item-name{font-weight:700;color:var(--accent);margin-bottom:3px;}
+.maj-item-vals{font-size:11px;color:var(--text2);}
+.maj-form{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:16px;}
+.maj-form-title{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;}
+.maj-form-grid{display:grid;gap:10px;}
+.maj-form-grid.cols2{grid-template-columns:1fr 1fr;}
+.maj-form-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.maj-field{display:flex;flex-direction:column;gap:4px;}
+.maj-lbl{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+.maj-inp{background:var(--inp-bg);border:1px solid var(--border2);border-radius:6px;padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:13px;font-weight:600;outline:none;transition:border-color .2s;width:100%;}
+.maj-inp:focus{border-color:var(--accent2);}
+.maj-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn-maj-validate{flex:1;padding:11px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--accent2),var(--accent));color:white;font-weight:700;cursor:pointer;font-size:13px;font-family:var(--sans);}
+.btn-maj-download{flex:1;padding:11px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--warn),#e8920a);color:white;font-weight:700;cursor:pointer;font-size:13px;font-family:var(--sans);display:none;}
+.btn-maj-delete{padding:11px 16px;border:1px solid color-mix(in srgb,var(--danger) 40%,transparent);border-radius:8px;background:color-mix(in srgb,var(--danger) 12%,var(--surface2));color:var(--danger);font-weight:700;cursor:pointer;font-size:13px;font-family:var(--sans);}
+.btn-maj-close{padding:11px 16px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--text2);font-weight:700;cursor:pointer;font-size:13px;}
+.maj-status{font-family:var(--mono);font-size:12px;min-height:18px;margin-bottom:10px;padding:0 2px;}
+.maj-status.ok{color:var(--accent2);}
+.maj-status.err{color:var(--danger);}
+/* PDF EXPORT SELECTOR MODAL */
+#pdf-sel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.80);z-index:9400;display:none;align-items:center;justify-content:center;backdrop-filter:blur(5px);}
+#pdf-sel-overlay.open{display:flex;}
+.pdf-sel-modal{background:var(--surface);border:2px solid var(--warn);border-radius:16px;padding:28px 32px;max-width:500px;width:94%;box-shadow:0 16px 70px rgba(245,166,35,0.3);}
+.pdf-sel-title{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--warn);margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.pdf-sel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.pdf-chk-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s;user-select:none;}
+.pdf-chk-item:hover{border-color:var(--border2);}
+.pdf-chk-item.checked{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 8%,var(--surface2));}
+.pdf-chk-box{width:18px;height:18px;border-radius:4px;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:12px;}
+.pdf-chk-item.checked .pdf-chk-box{border-color:var(--warn);background:var(--warn);color:white;}
+.pdf-chk-label{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text2);}
+.pdf-chk-item.checked .pdf-chk-label{color:var(--text);}
+.pdf-sel-actions{display:flex;gap:8px;}
+.btn-pdf-print{flex:1;padding:12px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--warn),#e8920a);color:white;font-weight:700;cursor:pointer;font-size:14px;}
+.btn-pdf-cancel{padding:12px 18px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--text2);font-weight:700;cursor:pointer;font-size:13px;}
+/* SQL IMPORT MODAL */
+#sql-import-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:8880;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+/* APP HEADER */
+.app-header{max-width:1600px;margin:0 auto 22px;display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.logo-block{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.logo-text h1{font-size:18px;font-weight:700;letter-spacing:-.5px;}
+.logo-text p{font-size:11px;color:var(--text2);font-family:var(--mono);}
+.header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.header-badge{background:color-mix(in srgb,var(--accent) 15%,transparent);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);color:var(--accent);font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:20px;letter-spacing:1px;}
+.theme-toggle{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:30px;padding:5px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);transition:all .2s;user-select:none;}
+.theme-toggle:hover{border-color:var(--accent);color:var(--text);}
+.toggle-switch{width:34px;height:18px;background:var(--border2);border-radius:20px;position:relative;transition:background .3s;}
+.toggle-switch::after{content:'';position:absolute;left:3px;top:3px;width:12px;height:12px;border-radius:50%;background:white;transition:transform .3s;}
+[data-theme="light"] .toggle-switch{background:var(--accent);}
+[data-theme="light"] .toggle-switch::after{transform:translateX(16px);}
+.btn-maj-bsd{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,color-mix(in srgb,var(--accent2) 25%,var(--surface2)),color-mix(in srgb,var(--accent2) 15%,var(--surface2)));color:var(--accent2);border:2px solid color-mix(in srgb,var(--accent2) 50%,transparent);font-family:var(--mono);letter-spacing:.5px;transition:all .2s;}
+.btn-maj-bsd:hover{border-color:var(--accent2);filter:brightness(1.1);}
+/* CONTAINER & CARDS */
+.container{max-width:1600px;margin:0 auto;display:flex;flex-direction:column;gap:18px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;transition:background .3s,border-color .3s;}
+.card-title{font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.card-title::before{content:'';display:inline-block;width:3px;height:14px;background:var(--accent);border-radius:2px;}
+/* SECTION LABELS */
+.sec-lbl{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;padding:4px 0 6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;}
+.sec-lbl+.sec-lbl,.card-title+.sec-lbl{margin-top:0;}
+.sec-lbl{margin-top:16px;}
+.sec-lbl:first-of-type{margin-top:0;}
+.sec-lbl::before{content:'';display:inline-block;width:3px;height:10px;border-radius:2px;flex-shrink:0;}
+.sec-ref::before{background:var(--accent);}
+.sec-detail::before{background:var(--accent2);}
+.sec-ship::before{background:var(--purple);}
+.sec-export::before{background:var(--warn);}
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;}
+.grid-port{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.field-group{display:flex;flex-direction:column;gap:5px;position:relative;}
+.field-label{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;}
+.field-input{background:var(--inp-bg);border:1px solid var(--border);border-radius:6px;padding:8px 11px;color:var(--text);font-family:var(--mono);font-size:13px;font-weight:600;transition:border-color .2s,background .3s;width:100%;}
+.field-input:focus{outline:none;border-color:var(--accent);}
+.field-input:disabled{color:var(--accent2);border-color:color-mix(in srgb,var(--accent2) 40%,transparent);background:color-mix(in srgb,var(--accent2) 8%,var(--inp-bg));}
+.field-new{border-color:color-mix(in srgb,var(--warn) 50%,transparent);background:color-mix(in srgb,var(--warn) 5%,var(--inp-bg));}
+.field-new:focus{border-color:var(--warn);}
+.field-label-new{color:var(--warn);}
+/* AUTOCOMPLETE */
+.autocomplete-list{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--accent);border-radius:0 0 8px 8px;z-index:500;max-height:200px;overflow-y:auto;display:none;box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+.autocomplete-list.open{display:block;}
+.autocomplete-item{padding:8px 12px;font-family:var(--mono);font-size:12px;cursor:pointer;border-bottom:1px solid var(--border);}
+.autocomplete-item:hover{background:color-mix(in srgb,var(--accent) 15%,var(--surface));}
+.autocomplete-item:last-child{border-bottom:none;}
+/* TOGGLE FORCE */
+.toggle-force-ctn{display:flex;align-items:center;gap:10px;margin-top:14px;padding:10px 16px;border-radius:8px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .25s;user-select:none;width:fit-content;}
+.toggle-force-ctn.on{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,var(--surface2));}
+.toggle-force-ctn .tfc-pill{width:42px;height:22px;border-radius:20px;background:var(--border2);position:relative;transition:background .25s;flex-shrink:0;}
+.toggle-force-ctn.on .tfc-pill{background:var(--warn);}
+.toggle-force-ctn .tfc-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.toggle-force-ctn.on .tfc-thumb{transform:translateX(20px);}
+.toggle-force-ctn .tfc-label{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text2);transition:color .25s;}
+.toggle-force-ctn.on .tfc-label{color:var(--warn);}
+.toggle-force-ctn .tfc-badge{font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:10px;background:var(--border);color:var(--text3);transition:all .25s;margin-left:2px;}
+.toggle-force-ctn.on .tfc-badge{background:color-mix(in srgb,var(--warn) 25%,var(--surface2));color:var(--warn);}
+/* MODE CARDS */
+.mode-card{flex:1;min-width:200px;background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:14px 18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px;}
+.mode-card:hover{border-color:var(--border2);}
+.mode-card.active{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface2));}
+.mode-card input[type="radio"]{display:none;}
+.mode-icon{font-size:24px;flex-shrink:0;}
+.mode-info h3{font-size:12px;font-weight:700;margin-bottom:2px;}
+.mode-info p{font-size:11px;color:var(--text2);line-height:1.4;}
+.mode-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--border2);margin-left:auto;flex-shrink:0;transition:all .2s;}
+.mode-card.active .mode-dot{background:var(--accent);border-color:var(--accent);}
+.mode-grid{display:flex;gap:12px;flex-wrap:wrap;}
+.max-sizes-row{margin-top:12px;display:none;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:color-mix(in srgb,var(--purple) 8%,var(--surface2));border:1px solid color-mix(in srgb,var(--purple) 30%,transparent);border-radius:8px;}
+.max-sizes-row.visible{display:flex;}
+.max-sizes-label{font-size:11px;font-family:var(--mono);color:var(--purple);font-weight:700;}
+.max-size-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--border2);background:var(--surface2);color:var(--text2);transition:all .2s;}
+.max-size-btn.active{border-color:var(--purple);color:var(--purple);background:color-mix(in srgb,var(--purple) 15%,var(--surface2));}
+/* COLOR TABS */
+.colors-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.color-tabs{display:flex;gap:6px;flex-wrap:wrap;flex:1;}
+.color-tab{padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700;font-family:var(--mono);cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text2);transition:all .2s;display:flex;align-items:center;gap:6px;}
+.color-tab.active{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface2));}
+.tab-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.btn-tab-add{padding:7px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;background:color-mix(in srgb,var(--accent2) 15%,var(--surface2));color:var(--accent2);border:1px dashed color-mix(in srgb,var(--accent2) 50%,transparent);transition:all .2s;}
+.btn-tab-remove{padding:7px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;background:color-mix(in srgb,var(--danger) 12%,var(--surface2));color:var(--danger);border:1px dashed color-mix(in srgb,var(--danger) 40%,transparent);transition:all .2s;}
+.color-panel{display:none;}
+.color-panel.active{display:block;}
+.color-name-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.color-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
+.color-name-input{background:var(--inp-bg);border:1px solid var(--border);border-radius:6px;padding:7px 12px;color:var(--text);font-family:var(--mono);font-size:13px;font-weight:700;width:160px;text-transform:uppercase;}
+.color-name-input:focus{outline:none;border-color:var(--accent);}
+.per-color-mode-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.per-color-mode-label{font-size:11px;font-family:var(--mono);color:var(--text2);}
+.per-color-mode-btn{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);transition:all .2s;}
+.per-color-mode-btn.active-solid{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface2));}
+.per-color-mode-btn.active-mixed{border-color:var(--purple);color:var(--purple);background:color-mix(in srgb,var(--purple) 12%,var(--surface2));}
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+.input-table{border:2px solid var(--border2);}
+.input-table thead tr th{background:color-mix(in srgb,var(--accent) 18%,var(--surface2));color:var(--accent);font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 6px;text-align:center;border:1px solid var(--border2);font-weight:700;}
+.input-table thead tr th:first-child{text-align:left;padding-left:12px;}
+.input-table tbody tr{border-bottom:1px solid var(--border);}
+.input-table td{border:1px solid var(--border);padding:6px;text-align:center;vertical-align:middle;}
+.row-label{padding:8px 14px;font-size:11px;font-family:var(--mono);color:var(--text2);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;background:color-mix(in srgb,var(--surface2) 60%,transparent);min-width:200px;border:1px solid var(--border2)!important;}
+.inp{background:var(--inp-bg);border:1px solid var(--border);border-radius:5px;padding:6px 4px;text-align:center;color:var(--text);font-family:var(--mono);font-size:12px;font-weight:600;transition:border-color .2s,background .3s;text-transform:uppercase;}
+.inp:focus{outline:none;border-color:var(--accent);}
+.inp-name{width:68px;}.inp-qty{width:76px;}.inp-cbm{width:44px;}
+.btn-box-detail{background:color-mix(in srgb,var(--purple) 18%,transparent);border:1px solid color-mix(in srgb,var(--purple) 40%,transparent);color:var(--purple);border-radius:5px;padding:4px 8px;font-size:13px;cursor:pointer;transition:all .2s;line-height:1;}
+.btn-box-detail:hover{background:color-mix(in srgb,var(--purple) 30%,transparent);}
+/* MODELS APPLY ROW */
+.models-apply-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;}
+.models-apply-item{display:flex;align-items:center;gap:6px;}
+.models-apply-label{font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+.dim-model-select{background:var(--inp-bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text);font-family:var(--mono);font-size:12px;cursor:pointer;}
+.dim-model-select:focus{outline:none;border-color:var(--purple);}
+/* MODELS MANAGER */
+.models-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:12px;}
+.model-card{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:5px;position:relative;}
+.model-card-name{font-family:var(--mono);font-size:12px;font-weight:700;}
+.model-card-vals{font-family:var(--mono);font-size:11px;color:var(--text2);display:flex;flex-wrap:wrap;gap:5px;}
+.model-badge{border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;}
+.mb-dim{background:color-mix(in srgb,var(--purple) 15%,var(--surface2));border:1px solid color-mix(in srgb,var(--purple) 30%,transparent);color:var(--purple);}
+.mb-wp{background:color-mix(in srgb,var(--warn) 15%,var(--surface2));border:1px solid color-mix(in srgb,var(--warn) 30%,transparent);color:var(--warn);}
+.mb-wc{background:color-mix(in srgb,var(--accent2) 15%,var(--surface2));border:1px solid color-mix(in srgb,var(--accent2) 30%,transparent);color:var(--accent2);}
+.model-card-del{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;line-height:1;padding:2px 5px;border-radius:4px;transition:all .2s;}
+.model-card-del:hover{color:var(--danger);background:color-mix(in srgb,var(--danger) 15%,transparent);}
+.model-add-form{display:flex;gap:8px;align-items:flex-end;padding:12px;border:1px dashed var(--border2);border-radius:8px;flex-wrap:wrap;}
+.model-add-form .field-group{flex:1;min-width:120px;}
+/* BUTTONS */
+.btn{padding:10px 18px;border:none;border-radius:7px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:7px;letter-spacing:.3px;}
+.btn:active{transform:scale(.97);}
+.btn-add{background:color-mix(in srgb,var(--accent) 20%,var(--surface2));color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);}
+.btn-remove{background:color-mix(in srgb,var(--danger) 15%,var(--surface2));color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);}
+.btn-generate{background:linear-gradient(135deg,var(--accent),var(--purple));color:white;font-size:14px;padding:13px 28px;flex:2;justify-content:center;box-shadow:0 4px 20px color-mix(in srgb,var(--accent) 30%,transparent);}
+.btn-generate:hover{filter:brightness(1.1);}
+.btn-excel{background:color-mix(in srgb,var(--accent2) 18%,var(--surface2));color:var(--accent2);border:1px solid color-mix(in srgb,var(--accent2) 40%,transparent);flex:1;justify-content:center;}
+.btn-pdf{background:color-mix(in srgb,var(--warn) 18%,var(--surface2));color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);flex:1;justify-content:center;}
+.btn-reset{padding:10px 18px;border-radius:7px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;background:color-mix(in srgb,var(--danger) 18%,var(--surface2));color:var(--danger);border:1px solid color-mix(in srgb,var(--danger) 40%,transparent);transition:all .15s;}
+.btn-reset:hover{background:color-mix(in srgb,var(--danger) 28%,var(--surface2));}
+.actions-row{display:flex;gap:10px;flex-wrap:wrap;}
+/* RESULT */
+.result-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;border:2px solid var(--border2);}
+.result-table th{background:var(--surface2);color:var(--text2);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 9px;text-align:center;border:1px solid var(--border2);white-space:nowrap;font-weight:700;}
+.result-table th:first-child{text-align:left;padding-left:14px;}
+.result-table td{padding:8px 9px;text-align:center;border:1px solid var(--border);color:var(--text);font-weight:500;}
+.result-table td:first-child{text-align:left;padding-left:14px;font-weight:700;}
+.solid-row:hover td{background:var(--row-hover);}
+.mixed-row td{background:var(--mixed-bg);}
+.mixed-row:hover td{background:color-mix(in srgb,var(--purple) 10%,transparent);}
+.total-row td{background:var(--total-bg)!important;color:var(--total-text)!important;font-weight:700;border-top:2px solid var(--total-border)!important;border-bottom:2px solid var(--total-border)!important;border:1px solid var(--total-border)!important;}
+.editable-cell{width:54px;padding:5px 4px;text-align:center;border:1px dashed color-mix(in srgb,var(--purple) 60%,transparent);border-radius:4px;background:color-mix(in srgb,var(--purple) 10%,transparent);color:var(--text);font-family:var(--mono);font-size:12px;font-weight:600;}
+.editable-cell:focus{outline:none;border:1px solid var(--purple);}
+.result-color-title{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 16px;border-radius:8px;background:color-mix(in srgb,var(--accent) 8%,var(--surface2));border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent);}
+.dot-color{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px;}
+.stat-chip{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;}
+.stat-label{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+.stat-value{font-size:17px;font-weight:700;font-family:var(--mono);}
+.c-accent{color:var(--accent);}.c-green{color:var(--accent2);}.c-warn{color:var(--warn);}.c-purple{color:var(--purple);}
+.info-alert{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.info-alert.solid{background:color-mix(in srgb,var(--accent) 10%,var(--surface2));border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);color:var(--accent);}
+.info-alert.mixed{background:color-mix(in srgb,var(--purple) 10%,var(--surface2));border:1px solid color-mix(in srgb,var(--purple) 30%,transparent);color:var(--purple);}
+.order-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;font-family:var(--mono);font-size:11px;color:var(--text2);}
+.order-meta span b{color:var(--text);}
+.combined-pl-wrapper{margin-top:8px;border:2px solid var(--accent)!important;}
+.combined-pl-title{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:12px 18px;border-radius:8px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 15%,var(--surface2)),color-mix(in srgb,var(--purple) 15%,var(--surface2)));border:2px solid color-mix(in srgb,var(--accent) 40%,transparent);font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);}
+.color-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;font-weight:700;}
+.legend-dot{width:12px;height:12px;border-radius:50%;}
+.color-stripe-cell{font-weight:700;font-family:var(--mono);font-size:10px;white-space:nowrap;}
+/* BREAKDOWN */
+.breakdown-section{margin-top:16px;}
+.breakdown-title{background:#f6e05e;color:#1a1a1a;font-family:var(--mono);font-size:13px;font-weight:700;padding:10px 16px;border-radius:8px 8px 0 0;letter-spacing:1px;border:2px solid #d4b800;}
+.breakdown-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;border:2px solid #d4b800;border-top:none;}
+.breakdown-table th{background:#fffde7;color:#7B6000;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 10px;text-align:center;border:1px solid #d4b800;font-weight:700;}
+.breakdown-table td{padding:7px 10px;text-align:center;border:1px solid #ddd;font-weight:500;}
+.breakdown-table .bk-color-cell{font-weight:700;text-align:left;padding-left:14px;}
+.breakdown-table .bk-ttl-row td{background:#fffde7;font-weight:700;border-top:2px solid #d4b800;}
+.breakdown-summary{padding:16px;border:2px solid #d4b800;border-top:none;background:var(--surface2);border-radius:0 0 8px 8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;}
+.breakdown-kv{display:flex;gap:10px;align-items:baseline;font-family:var(--mono);font-size:12px;}
+.breakdown-kv .bk-key{color:var(--text2);font-weight:600;min-width:140px;}
+.breakdown-kv .bk-val{color:var(--text);font-weight:700;font-size:14px;}
+/* SKU col highlight */
+.th-sku{background:color-mix(in srgb,var(--accent2) 20%,var(--surface2))!important;color:var(--accent2)!important;}
+.td-sku{color:var(--accent2);font-weight:700!important;font-size:11px;}
+/* PDF PRINT — controlled by checkboxes */
+@media print{
+  body{background:white!important;color:black!important;padding:0!important;font-family:Arial,sans-serif;}
+  #welcome-overlay,#box-modal-overlay,#maj-modal-overlay,#pdf-sel-overlay,#sql-import-overlay{display:none!important;}
+  .app-header,.mode-grid,.actions-row,.btn,.theme-toggle,.color-tabs,.btn-tab-add,.btn-tab-remove,.btn-reset,.per-color-mode-row,.models-apply-row,.max-sizes-row,.card:not(.result-card),.info-alert{display:none!important;}
+  .card{border:none!important;background:white!important;padding:0!important;margin:0!important;}
+  #result-section{display:block!important;}
+  .pdf-doc-header{display:block!important;}
+  .pdf-doc-header h1{text-align:center;color:#e05c5c;font-size:18pt;margin-bottom:8px;border-bottom:2px solid #e05c5c;padding-bottom:6px;}
+  .pdf-doc-header .pdf-info-block{background:#fdecea;border:1px solid #e8a0a0;padding:10px 14px;margin-bottom:12px;font-size:9pt;color:#c0392b;line-height:1.6;}
+  .result-table{border:1.5px solid #999!important;font-size:8pt;}
+  .result-table th{background:#f0f0f0!important;color:#333!important;border:1px solid #999!important;font-size:7pt;}
+  .result-table td{border:1px solid #ccc!important;font-size:8pt;}
+  .total-row td{background:#fffde7!important;color:#333!important;border:1px solid #aaa!important;font-weight:700!important;}
+  .mixed-row td,.solid-row td{background:white!important;}
+  .inp,.field-input,.editable-cell{border:none!important;background:transparent!important;color:black!important;}
+  .stats-bar{display:none!important;}
+  .result-color-title{background:#f0f0f0!important;color:#333!important;border:1px solid #ccc!important;font-size:9pt;}
+  .order-meta{font-size:8pt;color:#555!important;}
+  .order-meta span b{color:#000!important;}
+  .th-net{color:#00ACC1!important;font-weight:900!important;}
+  .th-gross{color:#e05c5c!important;font-weight:900!important;}
+  .td-net{color:#00695C!important;font-weight:700!important;}
+  .td-gross{color:#C62828!important;font-weight:700!important;}
+  .breakdown-title{background:#f6e05e!important;color:#1a1a1a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:9pt;}
+  .breakdown-table{font-size:8pt;}
+  .breakdown-table th{background:#fffde7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .breakdown-table .bk-ttl-row td{background:#fffde7!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .breakdown-summary{border:1px solid #d4b800;font-size:8pt;}
+  .color-legend{background:#f5f5f5!important;font-size:8pt;}
+  /* PDF visibility controlled by body classes */
+  body.pdf-hide-stats .stats-bar{display:none!important;}
+  body.pdf-hide-meta .order-meta{display:none!important;}
+  body.pdf-hide-breakdown .breakdown-section{display:none!important;}
+  body.pdf-hide-dim .dim-section{display:none!important;}
+  body.pdf-hide-combined #combined-pl-section{display:none!important;}
+  body.pdf-hide-individual .result-card:not(#combined-pl-section){display:none!important;}
+  body.pdf-hide-legend .color-legend{display:none!important;}
+  body.pdf-hide-header .pdf-doc-header{display:none!important;}
+}
+</style>
+</head>
+<body>
+<!-- WELCOME MODAL -->
+<div id="welcome-overlay">
+  <div class="welcome-box">
+    <div class="welcome-logo">📦</div>
+    <div class="welcome-title">PACKING LIST PRO</div>
+    <div class="welcome-sub">LOGISTICS OFFICER SYSTEM — v9.0</div>
+    <div class="welcome-error" id="welcome-error"></div>
+    <input type="password" class="welcome-input" id="welcome-input" placeholder="MOT DE PASSE" autocomplete="off" onkeydown="if(event.key==='Enter')checkWelcome()">
+    <button class="welcome-btn" onclick="checkWelcome()">🔐 ENTRER</button>
+  </div>
+</div>
+<!-- BOX DETAIL MODAL -->
+<div id="box-modal-overlay">
+  <div class="box-modal">
+    <div class="box-modal-title">✏️ DÉTAIL CARTON — <span id="bm-size-label"></span></div>
+    <div class="bm-section-lbl wgt">⚖️ Poids</div>
+    <div class="bm-weight-grid">
+      <div class="bm-field"><span class="bm-label">Poids Pièce (KG)</span><input class="bm-input wi" id="bm-wpiece" type="number" step="0.001" min="0" placeholder="0.250"></div>
+      <div class="bm-field"><span class="bm-label">Poids Carton Vide (KG)</span><input class="bm-input wi" id="bm-wcarton" type="number" step="0.01" min="0" placeholder="0.80"></div>
+    </div>
+    <div class="bm-section-lbl dim">📐 Dimensions Carton</div>
+    <div class="bm-dim-grid">
+      <div class="bm-field"><span class="bm-label">Longueur (cm)</span><input class="bm-input" id="bm-dimL" type="number" step="0.1" min="0" placeholder="60"></div>
+      <div class="bm-field"><span class="bm-label">Largeur (cm)</span><input class="bm-input" id="bm-diml" type="number" step="0.1" min="0" placeholder="40"></div>
+      <div class="bm-field"><span class="bm-label">Hauteur (cm)</span><input class="bm-input" id="bm-dimh" type="number" step="0.1" min="0" placeholder="30"></div>
+    </div>
+    <div class="box-modal-actions">
+      <button class="btn-modal-cancel" onclick="closeBoxModal()">✕ Annuler</button>
+      <button class="btn-modal-save" onclick="saveBoxModal()">💾 SAUVEGARDER</button>
+    </div>
+  </div>
+</div>
+<!-- MAJ BSD MODAL -->
+<div id="maj-modal-overlay">
+  <div class="maj-modal">
+    <div class="maj-title">🗂️ MAJ BASE DE DONNÉES — Modèles</div>
+    <div class="maj-type-row">
+      <button class="maj-type-btn active" onclick="majSetType('dim')">📐 Dim. Carton</button>
+      <button class="maj-type-btn" onclick="majSetType('wpiece')">⚖️ Poids Pièce</button>
+      <button class="maj-type-btn" onclick="majSetType('wcarton')">📦 Poids Carton</button>
+    </div>
+    <div class="maj-list-area">
+      <div class="maj-list-title">Sélectionnez un modèle à modifier ou créez-en un nouveau :</div>
+      <div class="maj-items-grid" id="maj-items-grid"></div>
+    </div>
+    <div class="maj-form" id="maj-form" style="display:none;">
+      <div class="maj-form-title" id="maj-form-title">Détails du modèle</div>
+      <div class="maj-form-grid" id="maj-form-grid"></div>
+    </div>
+    <div class="maj-status" id="maj-status"></div>
+    <div class="maj-actions">
+      <button class="btn-maj-validate" onclick="majValidate()">✅ Valider</button>
+      <button class="btn-maj-download" id="btn-maj-dl" onclick="majDownload()">⬇️ Télécharger models_db.json</button>
+      <button class="btn-maj-delete" id="btn-maj-del" onclick="majDelete()" style="display:none;">🗑️ Supprimer</button>
+      <button class="btn-maj-close" onclick="closeMajModal()">✕ Fermer</button>
+    </div>
+  </div>
+</div>
+<!-- PDF SELECTOR MODAL -->
+<div id="pdf-sel-overlay">
+  <div class="pdf-sel-modal">
+    <div class="pdf-sel-title">📄 Sélectionner les éléments à imprimer</div>
+    <div class="pdf-sel-grid">
+      <div class="pdf-chk-item checked" data-key="header" onclick="pdfToggle(this)">
+        <div class="pdf-chk-box">✓</div><span class="pdf-chk-label">📋 En-tête document</span>
+      </div>
+      <div class="pdf-chk-item checked" data-key="meta" onclick="pdfToggle(this)">
+        <div class="pdf-chk-box">✓</div><span class="pdf-chk-label">ℹ️ Infos commande</span>
+      </div>
+      <div class="pdf-chk-item checked" data-key="individual" onclick="pdfToggle(this)">
+        <div class="pdf-chk-box">✓</div><span class="pdf-chk-label">📦 PL par couleur</span>
+      </div>
+      <div class="pdf-chk-item checked" data-key="combined" onclick="pdfToggle(this)">
+        <div class="pdf-chk-box">✓</div><span class="pdf-chk-label">📁 PL combinée</span>
+      </div>
+      <div class="pdf-chk-item checked" data-key="legend" onclick="pdfToggle(this)">
+        <div class="pdf-chk-box">✓</div><span class="pdf-chk-label">🎨 Légende couleurs</span>
+      </div>
+      <div class="pdf-chk-item checked" data-key="breakdown" onclick="pdfToggle(this)">
+        <div class="pdf-chk-box">✓</div><span class="pdf-chk-label">📊 Color/Size Breakdown</span>
+      </div>
+      <div class="pdf-chk-item" data-key="dim" onclick="pdfToggle(this)">
+        <div class="pdf-chk-box"></div><span class="pdf-chk-label">📐 Tableau Poids/Dim</span>
+      </div>
+      <div class="pdf-chk-item checked" data-key="stats" onclick="pdfToggle(this)">
+        <div class="pdf-chk-box">✓</div><span class="pdf-chk-label">📈 Stats (cartons/pièces)</span>
+      </div>
+    </div>
+    <div class="pdf-sel-actions">
+      <button class="btn-pdf-print" onclick="executePrint()">🖨️ IMPRIMER / PDF</button>
+      <button class="btn-pdf-cancel" onclick="closePdfSel()">✕ Annuler</button>
+    </div>
+  </div>
+</div>
+<!-- SQL IMPORT MODAL -->
+<div id="sql-import-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:8880;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:var(--surface);border:2px solid var(--accent2);border-radius:14px;padding:28px 32px;max-width:440px;width:94%;box-shadow:0 12px 60px rgba(56,217,169,0.3);">
+    <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:18px;">🗄️ CHARGER BASE DE DONNÉES SQL</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:16px;font-family:var(--mono);">Sélectionnez votre fichier <b>.sql</b> précédemment exporté.</div>
+    <input type="file" id="sql-file-input" accept=".sql,.txt" style="display:none;" onchange="importSQLFile(this)">
+    <div id="sql-drop-zone" onclick="document.getElementById('sql-file-input').click()" style="border:2px dashed var(--accent2);border-radius:10px;padding:28px;text-align:center;cursor:pointer;margin-bottom:16px;"
+      ondragover="event.preventDefault();this.style.background='color-mix(in srgb,var(--accent2) 15%,var(--surface))'"
+      ondragleave="this.style.background=''"
+      ondrop="event.preventDefault();this.style.background='';handleSQLDrop(event)">
+      <div style="font-size:32px;margin-bottom:8px;">📂</div>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--text2);">Cliquez ou glissez votre fichier <b style="color:var(--accent2);">.sql</b></div>
+    </div>
+    <div id="sql-import-status" style="font-family:var(--mono);font-size:12px;color:var(--accent2);min-height:18px;margin-bottom:12px;"></div>
+    <button onclick="document.getElementById('sql-import-overlay').style.display='none'" style="width:100%;padding:10px;border:1px solid var(--border2);border-radius:7px;background:transparent;color:var(--text2);font-weight:700;cursor:pointer;">✕ Fermer</button>
+  </div>
+</div>
+<header class="app-header">
+  <div class="logo-block">
+    <div class="logo-icon">📦</div>
+    <div class="logo-text"><h1>Packing List Pro</h1><p>LOGISTICS OFFICER SYSTEM</p></div>
+  </div>
+  <div class="header-right">
+    <span class="header-badge">v9.0 — 2025</span>
+    <button class="btn-maj-bsd" onclick="openMajModal()">🗂️ MAJ BSD</button>
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <span id="theme-label">🌙 Dark</span>
+      <div class="toggle-switch"></div>
+    </div>
+  </div>
+</header>
+<div class="container">
+  <!-- INFORMATIONS COMMANDE -->
+  <div class="card">
+    <div class="card-title">Informations Commande</div>
+    <!-- REF -->
+    <div class="sec-lbl sec-ref">📋 Références de la Commande</div>
+    <div class="grid-2">
+      <div class="field-group">
+        <span class="field-label">Order / Commande</span>
+        <input class="field-input" type="text" id="info-order" placeholder="ex: 2630001AA" oninput="updateFilename()">
+      </div>
+      <div class="field-group" id="customer-field-group">
+        <span class="field-label">Customer / Client (Mers)</span>
+        <input class="field-input" type="text" id="info-customer" placeholder="ex: Johnnie-O" oninput="onCustomerInput()" autocomplete="off">
+        <div class="autocomplete-list" id="customer-autocomplete"></div>
+      </div>
+      <div class="field-group">
+        <span class="field-label">PO# Client</span>
+        <input class="field-input" type="text" id="info-po" placeholder="ex: 08788-00" oninput="updateFilename()">
+      </div>
+      <div class="field-group">
+        <span class="field-label field-label-new">Ref Client ★</span>
+        <input class="field-input field-new" type="text" id="info-ref-client" placeholder="ex: RC-2025-001">
+      </div>
+      <div class="field-group">
+        <span class="field-label field-label-new">Invoice N° ★</span>
+        <input class="field-input field-new" type="text" id="info-invoice" placeholder="ex: INV-2025-001">
+      </div>
+    </div>
+    <!-- ORDER DETAILS -->
+    <div class="sec-lbl sec-detail">🏷️ Order Details</div>
+    <div class="grid-3">
+      <div class="field-group">
+        <span class="field-label">Style N°</span>
+        <input class="field-input" type="text" id="info-style" placeholder="ex: JWSW100150 - AMANDA" oninput="updateFilename()">
+      </div>
+      <div class="field-group">
+        <span class="field-label field-label-new">Style Number ★</span>
+        <input class="field-input field-new" type="text" id="info-style-number" placeholder="ex: JWSW100150">
+      </div>
+      <div class="field-group">
+        <span class="field-label field-label-new">SKU ★</span>
+        <input class="field-input field-new" type="text" id="info-sku" placeholder="ex: SKU-100150-BLK">
+      </div>
+      <div class="field-group">
+        <span class="field-label field-label-new">Yarn ★</span>
+        <input class="field-input field-new" type="text" id="info-yarn" placeholder="ex: 100% Merino Wool">
+      </div>
+      <div class="field-group">
+        <span class="field-label field-label-new">Composition ★</span>
+        <input class="field-input field-new" type="text" id="info-composition" placeholder="ex: 80% Cotton 20% Polyester">
+      </div>
+    </div>
+    <!-- EXPEDITION -->
+    <div class="sec-lbl sec-ship">🚢 Expédition & Destination</div>
+    <div class="grid-3">
+      <div class="field-group">
+        <span class="field-label field-label-new">Destination ★</span>
+        <input class="field-input field-new" type="text" id="info-destination" placeholder="ex: Raleigh NC USA">
+      </div>
+      <div class="field-group">
+        <span class="field-label field-label-new">Adresse Livraison ★</span>
+        <input class="field-input field-new" type="text" id="info-address" placeholder="ex: 2710 Wycliff Rd.">
+      </div>
+      <div class="field-group">
+        <span class="field-label field-label-new">Pays de Destination ★</span>
+        <input class="field-input field-new" type="text" id="info-pays" placeholder="ex: UNITED STATES">
+      </div>
+    </div>
+    <div class="grid-port">
+      <div class="field-group">
+        <span class="field-label field-label-new">Port de Départ ★</span>
+        <input class="field-input field-new" type="text" id="info-port-depart" placeholder="ex: Antananarivo">
+      </div>
+      <div class="field-group">
+        <span class="field-label field-label-new">Port d'Arrivée ★</span>
+        <input class="field-input field-new" type="text" id="info-port-arrivee" placeholder="ex: New York">
+      </div>
+    </div>
+    <!-- EXPORT -->
+    <div class="sec-lbl sec-export">📊 Résumé & Export</div>
+    <div class="grid-3">
+      <div class="field-group">
+        <span class="field-label">Couleur(s)</span>
+        <input class="field-input" type="text" id="info-color-display" disabled>
+      </div>
+      <div class="field-group">
+        <span class="field-label">Quantité Totale (PCS)</span>
+        <input class="field-input" type="text" id="info-total-qty" disabled>
+      </div>
+      <div class="field-group">
+        <span class="field-label">Nom fichier Export</span>
+        <input class="field-input" type="text" id="info-filename" placeholder="auto-genere">
+      </div>
+    </div>
+    <div style="margin-top:12px;padding:6px 12px;background:color-mix(in srgb,var(--warn) 10%,var(--surface2));border:1px solid color-mix(in srgb,var(--warn) 30%,transparent);border-radius:6px;font-family:var(--mono);font-size:10px;color:var(--warn);">
+      ★ = Champs supplémentaires (Ref Client, Invoice, Style Number, SKU, Yarn, Composition, Ports, Destination, Pays)
+    </div>
+  </div>
+  <!-- STRATEGIE -->
+  <div class="card">
+    <div class="card-title">Stratégie d'Emballage</div>
+    <div class="mode-grid">
+      <label class="mode-card active" id="card-solid" onclick="selectMode('strict_solide')">
+        <input type="radio" name="modeEmballage" value="strict_solide" checked>
+        <div class="mode-icon">📦</div>
+        <div class="mode-info"><h3>SOLID PACK STRICT</h3><p>Chaque carton = une seule taille.</p></div>
+        <div class="mode-dot"></div>
+      </label>
+      <label class="mode-card" id="card-mixed" onclick="selectMode('mixte_autorise')">
+        <input type="radio" name="modeEmballage" value="mixte_autorise">
+        <div class="mode-icon">🔀</div>
+        <div class="mode-info"><h3>MIXED PACK AUTORISÉ</h3><p>Restes regroupés en cartons mixtes.</p></div>
+        <div class="mode-dot"></div>
+      </label>
+    </div>
+    <div class="max-sizes-row" id="max-sizes-row">
+      <span class="max-sizes-label">Max tailles / carton :</span>
+      <button class="max-size-btn" data-val="2" onclick="setMaxSizes(2,this)">2 tailles</button>
+      <button class="max-size-btn active" data-val="3" onclick="setMaxSizes(3,this)">3 tailles</button>
+      <button class="max-size-btn" data-val="99" onclick="setMaxSizes(99,this)">Toutes</button>
+    </div>
+    <div class="toggle-force-ctn" id="toggle-force-ctn" onclick="toggleForceSingleCtn()">
+      <div class="tfc-pill"><div class="tfc-thumb"></div></div>
+      <span class="tfc-label">📦 Forcer 1 carton unique</span>
+      <span class="tfc-badge" id="tfc-badge">DÉSACTIVÉ</span>
+    </div>
+  </div>
+  <!-- SAISIE COULEURS -->
+  <div class="card">
+    <div class="card-title">Saisie des Données — par Couleur</div>
+    <div class="colors-header">
+      <div class="color-tabs" id="color-tabs"></div>
+      <button class="btn-tab-add" onclick="ajouterCouleur()">＋ Couleur</button>
+      <button class="btn-tab-remove" onclick="supprimerCouleur()">－ Couleur</button>
+    </div>
+    <div id="color-panels"></div>
+  </div>
+  <!-- MODELES -->
+  <div class="card">
+    <div class="card-title">Modèles — Base de Données <span style="font-size:9px;color:var(--text3);margin-left:8px;font-family:var(--mono);">(source: models_db.json)</span></div>
+    <div class="sec-lbl" style="margin-top:0;"><span style="display:inline-block;width:3px;height:10px;border-radius:2px;background:var(--purple);margin-right:4px;"></span>📐 Dimensions Carton</div>
+    <div class="models-grid" id="dim-models-list"></div>
+    <div class="sec-lbl"><span style="display:inline-block;width:3px;height:10px;border-radius:2px;background:var(--warn);margin-right:4px;"></span>⚖️ Poids Pièce</div>
+    <div class="models-grid" id="wp-models-list"></div>
+    <div class="sec-lbl"><span style="display:inline-block;width:3px;height:10px;border-radius:2px;background:var(--accent2);margin-right:4px;"></span>📦 Poids Carton Vide</div>
+    <div class="models-grid" id="wc-models-list"></div>
+    <div style="margin-top:10px;padding:8px 12px;background:color-mix(in srgb,var(--accent2) 8%,var(--surface2));border:1px solid color-mix(in srgb,var(--accent2) 25%,transparent);border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--accent2);">
+      💡 Utilisez le bouton <b>MAJ BSD</b> en haut pour ajouter / modifier / supprimer des modèles et générer un nouveau <b>models_db.json</b>.
+    </div>
+  </div>
+  <div class="actions-row">
+    <button class="btn btn-generate" onclick="generer()">🔧 GÉNÉRER LA PACKING LIST</button>
+    <button class="btn btn-excel" id="btnExcel" style="display:none;" onclick="exporterExcel()">📊 EXPORTER EXCEL</button>
+    <button class="btn btn-pdf" id="btnPDF" style="display:none;" onclick="openPdfSel()">📄 EXPORTER PDF</button>
+    <button class="btn" style="background:color-mix(in srgb,var(--accent2) 18%,var(--surface2));color:var(--accent2);border:1px solid color-mix(in srgb,var(--accent2) 40%,transparent);flex:1;justify-content:center;" onclick="exporterSQL()">🗄️ GÉNÉRER SQL</button>
+    <button class="btn" style="background:color-mix(in srgb,var(--warn) 18%,var(--surface2));color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);flex:1;justify-content:center;" onclick="document.getElementById('sql-import-overlay').style.display='flex'">📥 CHARGER SQL</button>
+    <button class="btn-reset" onclick="reinitialiser()">🔄 RÉINITIALISER TOUT</button>
+  </div>
+  <div id="result-section" style="display:none;"></div>
+</div>
